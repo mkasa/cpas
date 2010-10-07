@@ -1,0 +1,70 @@
+***************
+ What is cpas?
+***************
+
+Script languages like Perl or Python are useful and convenient.
+However, do you sometimes feel they are too slow?
+
+I often handle large files of nearly terabytes, being frustrated by
+slowness of Perl or Python. Nice things with script languages are,
+for example, (1) no compilation is needed, (2) a single file may
+contain a code and a document at once and thus easy to manage.
+
+When I found Tiny C Compiler (TCC, http://bellard.org/tcc/),
+it was pretty suprising to me. It had a C-script mode, in which you
+can write as this:
+
+	#!/usr/local/bin/tcc -run
+	#include <stdio.h>
+
+	int main() 
+	{
+	    printf("Hello World\n");
+	    return 0;
+	}
+
+CPp as a script (cpas) follows this idea to enable C++ scripting.
+
+
+***************
+Build & Install
+***************
+
+Just make and copy the executable to any place you like.
+
+
+***************
+  How to use
+***************
+
+Specify cpas in the shebang.
+
+	#!/usr/local/bin/cpas
+	#include <iostream>
+	using namespace std;
+	int main() {
+	    cout << "Hello, World!" << endl;
+	}
+
+***************
+ Advanced use
+***************
+
+t outputs a script stub when -skel option is specified.
+If you are going to use GNU getopt, use -getopt option together.
+To emit a perldoc-style document, use -doc, then your script
+becomes a document as well (i.e., perldoc your_script). 
+
+When your editor is emacs, -emacs might be also useful.
+I prefer to use -fskel, which is equivalent to giving all the options.
+
+
+***************
+    License
+***************
+
+This software is distributed under MIT/X license
+(http://www.opensource.org/licenses/mit-license.php).
+
+
+
