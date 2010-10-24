@@ -1,0 +1,8 @@
+
+.waf-*
+build
+cpas
+Makefile
+.lock-wscript
+*~
+

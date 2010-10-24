@@ -76,7 +76,7 @@ void convert_script(char *original_script)
 	continue;
       }
     }
-    fprintf(ofp, "%s\n", l);
+    fprintf(ofp, "%s", l);
   }
   fclose(ofp);
   fclose(ifp);

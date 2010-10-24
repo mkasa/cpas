@@ -3,7 +3,7 @@
 ***************
 
 Script languages like Perl or Python are useful and convenient.
-However, do you sometimes feel they are too slow?
+However, don't you sometimes feel they are too slow?
 
 I often handle large files of nearly terabytes, being frustrated by
 slowness of Perl or Python. Nice things with script languages are,
@@ -12,7 +12,7 @@ contain a code and a document at once and thus easy to manage.
 
 When I found Tiny C Compiler (TCC, http://bellard.org/tcc/),
 it was pretty suprising to me. It had a C-script mode, in which you
-can write as this:
+can write like this:
 
 	#!/usr/local/bin/tcc -run
 	#include <stdio.h>
@@ -23,21 +23,38 @@ can write as this:
 	    return 0;
 	}
 
+This script is compiled on the fly.
+
 CPp as a script (cpas) follows this idea to enable C++ scripting.
+
+cpas doesn't compile source code on the fly. It invokes g++ and
+the compiled code is stored in .cpas directory. .cpas directory
+is created in the same directory to the script unless the
+directory is not writable. If that is the case, compiled code
+is created under ~/.cpas  
+
+Compiled binaries are cached, so that it is automatically
+recompiled when the source code is modified.
 
 
 ***************
 Build & Install
 ***************
 
-Just make and copy the executable to any place you like.
+As usual for GNU tar balls, to configure, do as follows:
+
+	$ ./configure
+
+Then do make and make install,
+
+	$ make && make install
 
 
 ***************
   How to use
 ***************
 
-Specify cpas in the shebang.
+Specify cpas in the shebang. chmod the script file appropriately.
 
 	#!/usr/local/bin/cpas
 	#include <iostream>
@@ -46,11 +63,12 @@ Specify cpas in the shebang.
 	    cout << "Hello, World!" << endl;
 	}
 
+
 ***************
  Advanced use
 ***************
 
-t outputs a script stub when -skel option is specified.
+It outputs a script stub when -skel option is specified.
 If you are going to use GNU getopt, use -getopt option together.
 To emit a perldoc-style document, use -doc, then your script
 becomes a document as well (i.e., perldoc your_script). 
@@ -63,8 +81,7 @@ I prefer to use -fskel, which is equivalent to giving all the options.
     License
 ***************
 
-This software is distributed under MIT/X license
-(http://www.opensource.org/licenses/mit-license.php).
-
+This software is distributed under modified BSD license
+(http://www.opensource.org/licenses/bsd-license.php)
 
 
