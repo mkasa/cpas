@@ -282,9 +282,9 @@ int main(int argc, char *argv[])
     optind++;
   }
   if(argc < optind + 1) {
-    fprintf(stderr, "usage: ilcp [options] <script>\n");
-    fprintf(stderr, "       ilcp --skel [--getopt] [--doc] [--emacs] <new script>\n");
-    fprintf(stderr, "       ilcp --fskel <new script>\n");
+    fprintf(stderr, "usage: cpas [options] <script>\n");
+    fprintf(stderr, "       cpas --skel [--getopt] [--doc] [--emacs] <new script>\n");
+    fprintf(stderr, "       cpas --fskel <new script>\n");
     return 1;
   }
   original_script = argv[optind];
