@@ -185,7 +185,7 @@ void output_skelton(char *original_script)
     char *buf = (char *)malloc(PATH_MAX + 1);
     t = readlink("/proc/self/exe", buf, PATH_MAX);
     if(t == (ssize_t)-1) {
-      fprintf(stderr, "failed to obtain self path. this is unlikely to occur.\n");
+      fprintf(stderr, "failed to obtain self path. this is unlikely to occur if you are using Linux. Other OS is not supported yet.\n");
       exit(3);
     }
     buf[t] = '\0'; // readlink does not put '\0' at the end
@@ -236,6 +236,10 @@ void output_skelton(char *original_script)
   }
   fprintf(fp, "}\n");
   if(flag_perldoc) {
+    char *base_name, *p;
+    base_name = original_script;
+    while((p = strchr(base_name, '/')) != NULL)
+      base_name = p + 1;
     fprintf(fp, "\n/*\n"
 	    "=pod\n\n"
 	    "=head1 NAME\n\n"
@@ -244,7 +248,8 @@ void output_skelton(char *original_script)
 	    "\t [options]\n\n"
 	    "=head1 DESCRIPTION\n\n"
 	    "=cut\n"
-	    "*/\n"
+	    "*/\n",
+            base_name
 	    );
   }
   fclose(fp);
