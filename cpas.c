@@ -70,7 +70,7 @@ void convert_script(char *original_script)
 	l = strlen(compile_options);
 	if(0 < l && compile_options[l - 1] != ' ' && l + 1 < sizeof(compile_options)) {
 	  compile_options[l] = ' ';
-	  compile_options[l] = '\0';
+	  compile_options[l + 1] = '\0';
 	}
 	strncat(compile_options, p + 4, sizeof(compile_options));
 	continue;
