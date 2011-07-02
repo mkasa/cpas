@@ -9,6 +9,12 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
+#ifndef PREFIX_DIR
+static char *prefix_dir = "/usr";
+#else
+static char *prefix_dir = PREFIX_DIR;
+#endif
+
 static char *cache_dir_name = ".cpas";
 
 char executable_file_name[PATH_MAX];
@@ -19,7 +25,8 @@ char compile_options[1024];
 static int flag_skelton   = 0;
 static int flag_getopt    = 0;
 static int flag_perldoc   = 0;
-static int flag_emacs_var = 01;
+static int flag_stackdump = 0;
+static int flag_emacs_var = 1;
 
 void generate_cache_file_names()
 {
@@ -95,9 +102,14 @@ void compile_script()
     exit(WEXITSTATUS(status));
   }
   wait(&status);
-  if(!WIFEXITED(status) || WEXITSTATUS(status) == 6) {
+  if(!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
     exit(6);
   }
+}
+
+void remove_exe()
+{
+  unlink(executable_path);
 }
 
 void generate_executable_file_name(char *script_path)
@@ -195,6 +207,11 @@ void output_skelton(char *original_script)
   if(flag_emacs_var) {
     fprintf(fp, "// -*- mode:C++; c-basic-offset:2; tab-width:2 -*-\n");
   }
+  fprintf(fp, "//opt: -g -O1");
+  if(flag_stackdump) {
+    fprintf(fp, " -I%s", prefix_dir);
+  }
+  fprintf(fp, "\n");
   fprintf(fp, "#include <iostream>\n");
   fprintf(fp, "#include <fstream>\n");
   fprintf(fp, "#include <string>\n");
@@ -202,8 +219,14 @@ void output_skelton(char *original_script)
   if(flag_getopt) {
     fprintf(fp, "#include <getopt.h>\n");
   }
-  fprintf(fp, "using namespace std;\n");
+  if(flag_stackdump) {
+    fprintf(fp, "#include <stackdump.h>\n");
+  }
+  fprintf(fp, "\nusing namespace std;\n\n");
   fprintf(fp, "int main(int argc, char *argv[]) {\n");
+  if(flag_stackdump) {
+    fprintf(fp, "  GDB_On_SEGV gos(argv[0]);\n");
+  }
   if(flag_getopt) {
     fprintf(fp, "\tint c;\n"
 	  "\twhile(1) {\n"
@@ -258,6 +281,7 @@ void output_skelton(char *original_script)
 
 int main(int argc, char *argv[])
 {
+  printf("%s\n", prefix_dir);
   char *original_script;
   int optind;
   optind = 1;
@@ -302,6 +326,7 @@ int main(int argc, char *argv[])
   generate_cache_file_names();
   if(need_to_compile(original_script)) {
     convert_script(original_script);
+    remove_exe();
     compile_script();
   }
   exec_executable(argc - 2, argv + 2);

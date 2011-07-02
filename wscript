@@ -1,4 +1,3 @@
-
 # -*- python -*-
 APPNAME = 'cpas'
 VERSION = '1.02'
@@ -10,7 +9,10 @@ def configure(conf):
     conf.check_tool('compiler_cc')
 
 def build(bld):
+    # print bld.env
+    bld.env.CCFLAGS.append('-DPREFIX_DIR="' + bld.env.PREFIX + '"')
     bld(features='cc cprogram',
         source='cpas.c',
         target='cpas')
+    bld.install_files('${PREFIX}/include', ['stackdump.h'])
 
