@@ -88,10 +88,35 @@ If you are going to use GNU getopt, use -getopt option together.
 To emit a perldoc-style document, use -doc, then your script
 becomes a document as well (i.e., try 'perldoc your_script'). 
 
+If you prefer to see a stack dump when a program dies because of
+segmentation fault, add -sdump when you create a skelton.
+
+A special debug macro, which I developed for C++ debugging, is
+installed with cpas. Please add -dmacro when you create a skelton
+if you use the debug macro. For the debug macro, see the next
+section for details.
+
 When your editor is emacs, -emacs might be also useful to enforce
 c++ mode. I prefer to use -fskel, which is equivalent to giving
 all the above options.
 
+
+Debug macro
+===========
+
+Here is an exmaple.
+
+        #include <debug.h>
+
+        void your_function() {
+            int i = 1233;
+            // True, so nothing happens.
+            ASSERT(i == 1233);
+            int x = 1234;
+            // This assert fails. You'll see the message,
+            // and dump of the variable x.
+            ASSERT(x == 1233, "x must be 1233", VARDUMP(x));
+        }
 
 License
 =======

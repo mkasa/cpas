@@ -22,12 +22,13 @@ char my_cache_dir[PATH_MAX + 10];
 char source_code_path[PATH_MAX + 18];
 char executable_path[PATH_MAX + 18];
 char compile_options[1024];
-static int flag_skelton   = 0;
-static int flag_getopt    = 0;
-static int flag_perldoc   = 0;
-static int flag_stackdump = 0;
-static int flag_emacs_var = 1;
-
+static int flag_skelton    = 0;
+static int flag_getopt     = 0;
+static int flag_perldoc    = 0;
+static int flag_stackdump  = 0;
+static int flag_debugmacro = 0;
+static int flag_emacs_var  = 0;
+ 
 void generate_cache_file_names()
 {
   snprintf(source_code_path, sizeof(source_code_path), "%s/%s.cpp", my_cache_dir, executable_file_name);
@@ -222,6 +223,9 @@ void output_skelton(char *original_script)
   if(flag_stackdump) {
     fprintf(fp, "#include <stackdump.h>\n");
   }
+  if(flag_debugmacro) {
+    fprintf(fp, "#include <debug.h>\n");
+  }
   fprintf(fp, "\nusing namespace std;\n\n");
   fprintf(fp, "int main(int argc, char *argv[]) {\n");
   if(flag_stackdump) {
@@ -300,11 +304,17 @@ int main(int argc, char *argv[])
       flag_perldoc = 1;
     } else if(strcmp(optstr, "emacs") == 0) {
       flag_emacs_var = 1;
+    } else if(strcmp(optstr, "sdump") == 0) {
+      flag_stackdump = 1;
+    } else if(strcmp(optstr, "dmacro") == 0) {
+      flag_debugmacro = 1;
     } else if(strcmp(optstr, "fskel") == 0) {
       flag_skelton = 1;
       flag_getopt = 1;
       flag_perldoc = 1;
       flag_emacs_var = 1;
+      flag_stackdump = 1;
+      flag_debugmacro = 1;
     } else {
       fprintf(stderr, "unknown option %s\n", argv[optind]);
     }
@@ -312,7 +322,7 @@ int main(int argc, char *argv[])
   }
   if(argc < optind + 1) {
     fprintf(stderr, "usage: cpas [options] <script>\n");
-    fprintf(stderr, "       cpas --skel [--getopt] [--doc] [--emacs] <new script>\n");
+    fprintf(stderr, "       cpas --skel [--getopt] [--doc] [--emacs] [--sdump] [--dmacro] <new script>\n");
     fprintf(stderr, "       cpas --fskel <new script>\n");
     return 1;
   }

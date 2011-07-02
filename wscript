@@ -14,5 +14,5 @@ def build(bld):
     bld(features='cc cprogram',
         source='cpas.c',
         target='cpas')
-    bld.install_files('${PREFIX}/include', ['stackdump.h'])
+    bld.install_files('${PREFIX}/include', ['stackdump.h', 'debug.h'])
 
