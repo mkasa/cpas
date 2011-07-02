@@ -1,0 +1,103 @@
+#!/usr/bin/env perl
+
+use strict;
+use Getopt::Long;
+
+my $flag_stdout = 0;
+my $param_class = undef;
+my $param_search = undef;
+my $param_browser = undef;
+GetOptions(
+    "stdout|man" => \$flag_stdout,
+    "class|c=s" => \$param_class,
+    "search|k=s" => \$param_search,
+    "browser|b=s" => \$param_browser
+);
+
+my $fname = shift;
+unless(defined $fname || defined $param_class || defined $param_search) {
+    print STDERR "usage: cppdoc <input cpp>\n";
+    print STDERR "       cppdoc -c <class name>\n";
+    print STDERR "       cppdoc -k <key word>\n";
+    exit 1;
+}
+if(defined $param_class || defined $param_search) {
+    my $browser = $param_browser;
+    unless(defined $browser) {
+        $browser = $ENV{'CPPDOC_BROWSER'};
+    }
+    unless(defined $browser) {
+        my $w3m = `which w3m`;
+        chomp $w3m;
+        if(-x $w3m) {
+            $browser = $w3m;
+        } else {
+            my $lynx = `which lynx`;
+            chomp $lynx;
+            if(-x $lynx) {
+                $browser = $lynx;
+            } else {
+                print STDERR "Can't find a web browser.\n";
+                print STDERR "Please specify -b=<browser> option,\n";
+                print STDERR "or set CPPDOC_BROWSER environment variable.\n";
+                exit 1;
+            }
+        }
+    }
+    if($param_class) {
+        my $url = "http://www.cplusplus.com/$param_class";
+        open_url($browser, $url);
+    } else {
+        my $url = "http://www.cplusplus.com/search.do?q=$param_search";
+        open_url($browser, $url);
+    }
+    exit 0;
+}
+
+my $ver_str = "1.0";
+my $section = 1;
+my $base = $fname;
+$base =~ s|^.*/||;
+if($base =~ m|^(.*)\.([^\.]*)$|) {
+    $base = $1;
+}
+
+my $fh;
+open $fh, "<", $fname or die "Cannot open $fname";
+while(<$fh>) {
+    if(m|VERSION_?STRING|i) {
+	if(m|=\s*\"(.*?)\"|) {
+	    $ver_str = $1;
+	}
+    } elsif(m|MAN_?SECTION_?NUMBER|) {
+	if(m|=\s*(\d+)|) {
+	    $section = 1;
+	}
+    }
+}
+
+my $suf;
+if($flag_stdout) {
+    $suf = "";
+} else {
+    $suf = "| groff -m mandoc -Tutf8 | less -r";
+}
+system "pod2man -s $section -c \"User Commands\" -r \"$base $ver_str\" -n \"$base\" $fname $suf";
+if($?) {
+    print STDERR "Error occurred in executing pod2man.\n";
+    print STDERR "cppdoc requires pod2man, which comes with Perl distribution.\n";
+}
+
+
+sub open_url
+{
+    my ($browser, $url) = @_;
+    my $cmdline = "$browser $url";
+    system "$cmdline";
+    if($?) {
+        print STDERR "ERROR: could not launch a web browser. the command line used is shown below:\n";
+        print STDERR "       \$ $cmdline\n";
+        exit 2;
+    }
+}
+

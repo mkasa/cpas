@@ -56,6 +56,7 @@ class GDB_On_SEGV
 		  }
 	 }
 
+public:
 	 static void gdb_handler(int dummy) {
 		  int pid;
 		  if((pid = fork()) != 0) {
@@ -103,8 +104,6 @@ class GDB_On_SEGV
 			   }
 		  }
 	 }
-
-public:
 
 	 GDB_On_SEGV(char* argv0) {
 		  p = realpath(argv0, lbuf);

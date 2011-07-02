@@ -1,6 +1,6 @@
 # -*- python -*-
 APPNAME = 'cpas'
-VERSION = '1.02'
+VERSION = '1.03'
 
 def set_options(ctx):
     ctx.tool_options('compiler_cc')
@@ -15,4 +15,6 @@ def build(bld):
         source='cpas.c',
         target='cpas')
     bld.install_files('${PREFIX}/include', ['stackdump.h', 'debug.h'])
+    bld.install_files('${PREFIX}/bin', ['cppdoc'], chmod=0755)
+
 

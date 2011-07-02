@@ -1,16 +1,20 @@
 #ifndef _DEBUG_HEADER
 #define _DEBUG_HEADER
 
+#include <cstring>
+
+#define DEBUGMACRO_FUNCTIONNAME __PRETTY_FUNCTION__
+#define DEBUGMACRO_ABORT() GDB_On_SEGV::gdb_handler(0)
 #ifndef DEBUGMACRO_ERRORSTREAM
  #define DEBUGMACRO_ERRORSTREAM std::cerr
 #endif
 
 inline void DebugOutputVariableDumpHelper1(){}
-inline void DebugOutputVariableDumpHelper1(const char* str){if(std::strlen(str) != 0){DEBUGMACRO_ERRORSTREAM << str << " = ";}}
+inline void DebugOutputVariableDumpHelper1(const char* str){if(std::strlen(str) != 0){DEBUGMACRO_ERRORSTREAM << (str) << " = ";}}
 inline void DebugOutputVariableDumpHelper3(){}
-inline void DebugOutputVariableDumpHelper3(const char* str){if(std::strlen(str) != 0){DEBUGMACRO_ERRORSTREAM << "              " << str << " = ";}}
+inline void DebugOutputVariableDumpHelper3(const char* str){if(std::strlen(str) != 0){DEBUGMACRO_ERRORSTREAM << "              " << (str) << " = ";}}
 inline void DebugOutputVariableDumpHelper2(){}
-template<class T> inline void DebugOutputVariableDumpHelper2(const T& arg){DEBUGMACRO_ERRORSTREAM << arg << std::endl;}
+template<class T> inline void DebugOutputVariableDumpHelper2(const T& arg){DEBUGMACRO_ERRORSTREAM << (arg) << std::endl;}
 
 #define VARDUMP(arg, ...)   (DebugOutputVariableDumpHelper1(#arg),DebugOutputVariableDumpHelper2(arg),VARDUMP_1(__VA_ARGS__))
 #define VARDUMP_1(arg, ...) (DebugOutputVariableDumpHelper3(#arg),DebugOutputVariableDumpHelper2(arg),VARDUMP_2(__VA_ARGS__))

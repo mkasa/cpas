@@ -285,7 +285,6 @@ void output_skelton(char *original_script)
 
 int main(int argc, char *argv[])
 {
-  printf("%s\n", prefix_dir);
   char *original_script;
   int optind;
   optind = 1;

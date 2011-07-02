@@ -115,7 +115,7 @@ Here is an exmaple.
             int x = 1234;
             // This assert fails. You'll see the message,
             // and dump of the variable x.
-            ASSERT(x == 1233, "x must be 1233", VARDUMP(x));
+            ASSERT_WMD("x must be 1233", x == 1233, VARDUMP(x));
         }
 
 License
