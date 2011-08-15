@@ -90,17 +90,29 @@ void convert_script(char *original_script)
   fclose(ifp);
 }
 
-void compile_script()
+void compile_script(char *script_path)
 {
   int status;
   pid_t child;
   if((child = fork()) == 0) {
+    char canonical_path[PATH_MAX];
     char buf[2048];
     int mystatus;
-    sprintf(buf, "g++ %s -o %s %s\n", source_code_path, executable_path, compile_options);
+    char *original_code_real_path;
+    original_code_real_path = realpath(script_path, canonical_path);
+    if(original_code_real_path == NULL) {
+      fprintf(stderr, "error: could not resolve the real path of '%s'\n", script_path);
+      exit(6);
+    }
+    {
+      int p = strlen(original_code_real_path);
+      while(0 < p && canonical_path[p - 1] != '/') p--;
+      if(0 < p) canonical_path[p] = '\0';
+    }
+    sprintf(buf, "g++ %s -o %s -I%s %s\n", source_code_path, executable_path, canonical_path, compile_options);
     mystatus = system(buf);
     if(mystatus == -1) abort();
-    exit(WEXITSTATUS(status));
+    exit(WEXITSTATUS(mystatus));
   }
   wait(&status);
   if(!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
@@ -118,16 +130,16 @@ void generate_executable_file_name(char *script_path)
   const int CRCF = 0x04C11DB7;
   const int LEFT = 0x04000000;
   int       crc  =  0x1234567;
-  char canon_path[PATH_MAX];
+  char canonical_path[PATH_MAX];
   char *p;
   int i;
   char *r;
-  r = realpath(script_path, canon_path);
+  r = realpath(script_path, canonical_path);
   if(r == NULL) {
     fprintf(stderr, "error: cannot find '%s'\n", script_path);
     exit(5);
   }
-  for(p = canon_path; *p; p++) {
+  for(p = canonical_path; *p; p++) {
     for(i = 7; i >= 0; i--) {
       crc = (crc << 1) | ((*p >> i) & 1);
       if(crc & LEFT) crc ^= CRCF;
@@ -336,7 +348,7 @@ int main(int argc, char *argv[])
   if(need_to_compile(original_script)) {
     convert_script(original_script);
     remove_exe();
-    compile_script();
+    compile_script(original_script);
   }
   exec_executable(argc - 2, argv + 2);
 }

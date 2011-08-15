@@ -104,19 +104,20 @@ all the above options.
 Debug macro
 ===========
 
-Here is an exmaple.
+Here is an exmaple.::
 
-        #include <debug.h>
-
-        void your_function() {
-            int i = 1233;
-            // True, so nothing happens.
-            ASSERT(i == 1233);
-            int x = 1234;
-            // This assert fails. You'll see the message,
-            // and dump of the variable x.
-            ASSERT_WMD("x must be 1233", x == 1233, VARDUMP(x));
-        }
+	#include <debug.h>
+	
+	void your_function()
+	{
+	    int i = 1233;
+	    // True, so nothing happens.
+	    ASSERT(i == 1233);
+	    int x = 1234;
+	    // This assert fails. You'll see the message,
+	    // and dump of the variable x.
+	    ASSERT_WMD("x must be 1233", x == 1233, VARDUMP(x));
+	}
 
 License
 =======
