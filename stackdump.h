@@ -21,7 +21,7 @@ class GDB_On_SEGV
 	 static struct sigaction sa;     // we allocate it staticly.
 
 	 static void waitgdb(int fd) {
-		  int c = 0;
+		  int c = 1;
 		  int i;
 		  while((i = read(fd, stdoutbuf, sizeof(stdoutbuf))) > 0) {
 			   for(int j = 0; j < i; j++) {
@@ -79,20 +79,20 @@ public:
 					close(p[0]);
 					close(fp[1]);
 					waitgdb(fp[0]);
-					write(p[1], "bt full\n", 8);
 					write(1,    "bt full\n", 8);
+					write(p[1], "bt full\n", 8);
 					waitgdb(fp[0]);
-					write(p[1], "up 3\n", 5);
 					write(1,    "up 3\n", 5);
+					write(p[1], "up 3\n", 5);
 					waitgdb(fp[0]);
-					write(p[1], "l\n", 2);
 					write(1,    "l\n", 2);
+					write(p[1], "l\n", 2);
 					waitgdb(fp[0]);
-					write(p[1], "disas\n", 6);
 					write(1,    "disas\n", 6);
+					write(p[1], "disas\n", 6);
 					waitgdb(fp[0]);
-					write(p[1], "quit\n", 5);
 					write(1,    "quit\n", 5);
+					write(p[1], "quit\n", 5);
 					// sleep(3);
 					exit(3);
 			   } else {

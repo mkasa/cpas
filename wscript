@@ -14,7 +14,7 @@ def build(bld):
     bld(features='cc cprogram',
         source='cpas.c',
         target='cpas')
-    bld.install_files('${PREFIX}/include', ['stackdump.h', 'debug.h'])
+    bld.install_files('${PREFIX}/include', ['stackdump.h', 'debug.h', 'eval.h'])
     bld.install_files('${PREFIX}/bin', ['cppdoc'], chmod=0755)
 
 

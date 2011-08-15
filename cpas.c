@@ -22,6 +22,7 @@ char my_cache_dir[PATH_MAX + 10];
 char source_code_path[PATH_MAX + 18];
 char executable_path[PATH_MAX + 18];
 char compile_options[1024];
+char compile_options_last[1024];
 static int flag_skelton    = 0;
 static int flag_getopt     = 0;
 static int flag_perldoc    = 0;
@@ -45,16 +46,61 @@ int need_to_compile(char *original_script)
     fprintf(stderr, "error: cannot stat the source file '%s'\n", original_script);
     exit(7);
   }
-  if(sbuf.st_mtime <= ebuf.st_mtime)
-    return 0;
-  return 1; // it's old!
+  if(sbuf.st_mtime > ebuf.st_mtime)
+    return 1; // it's old! 
+  FILE *ifp;
+  char buf[1024];
+  if((ifp = fopen(original_script, "r")) == NULL) {
+    fprintf(stderr, "error: cannot open script '%s'\n", original_script);
+    exit(5);
+  }
+  int has_to_check_dependencies_strictly = 0;
+  while(!feof(ifp)) {
+    char *l = fgets(buf, sizeof(buf), ifp);
+    if(l == NULL) break;
+    if(buf[0] == '/' && buf[1] == '/') {
+      char *p;
+      p = strstr(buf + 2, "depend:");
+      if(p != NULL) {
+	has_to_check_dependencies_strictly = 1;
+      }
+    }    
+  }
+  if(has_to_check_dependencies_strictly) {
+    rewind(ifp);
+    // NOTE: This feature is not implemented yet.
+    // TODO: Check dependencies strictly here.
+  }
+  fclose(ifp);
+  return 0;
+}
+
+void ensure_a_string_ends_with_space(char* s, size_t buffer_length)
+{
+  const int l = strlen(s);
+  if(0 < l && s[l - 1] != ' ') {
+    if(l + 1 < buffer_length) {
+      s[l] = ' ';
+      s[l + 1] = '\0';
+    }
+  }
+}
+
+void chomp(char* s)
+{
+  char *p = s;
+  while(*p != '\0') p++;
+  p--;
+  if(s < p && *p == '\n') *p-- = '\0';
+  if(s < p && *p == '\r') *p-- = '\0';
+  if(s < p && *p == '\n') *p-- = '\0';
 }
 
 void convert_script(char *original_script)
 {
   FILE *ifp;
   FILE *ofp;
-  char buf[256];
+  char buf[1024];
   if((ifp = fopen(original_script, "r")) == NULL) {
     fprintf(stderr, "error: cannot open script '%s'\n", original_script);
     exit(3);
@@ -63,6 +109,7 @@ void convert_script(char *original_script)
     fprintf(stderr, "error: cannot open output cache script '%s'\n", source_code_path);
     exit(4);
   }
+  int has_included_eval_header = 0;
   while(!feof(ifp)) {
     char *l = fgets(buf, sizeof(buf), ifp);
     if(l == NULL) break;
@@ -70,21 +117,60 @@ void convert_script(char *original_script)
       fprintf(ofp, "//%s\n", buf); // for not to change the number of lines.
       continue;
     }
-    if(buf[0] == '/' && buf[1] == '/') {
-      char *p;
-      p = strstr(buf + 2, "opt:");
+    chomp(buf);
+    char *nsp = buf;
+    while(nsp < buf + sizeof(buf) && (*nsp == ' ' || *nsp == '\t')) nsp++;
+    if(*nsp == '#') {
+      char *p = nsp + 1;
+      while(p < buf + sizeof(buf) && (*p == ' ' || *p == '\t')) p++;
+      p = strstr(p, "include");
       if(p != NULL) {
-	int l;
-	l = strlen(compile_options);
-	if(0 < l && compile_options[l - 1] != ' ' && l + 1 < sizeof(compile_options)) {
-	  compile_options[l] = ' ';
-	  compile_options[l + 1] = '\0';
-	}
-	strncat(compile_options, p + 4, sizeof(compile_options));
-	continue;
+	// NOTE: Should use a better parser here...
+	//       This parser will not catch '#include< eval.h >', for example.
+	if(strstr(p, "\"eval.h\"") != NULL) has_included_eval_header = 1;
+	if(strstr(p, "<eval.h>") != NULL) has_included_eval_header = 1;
       }
     }
-    fprintf(ofp, "%s", l);
+    if(nsp + 2 < buf + sizeof(buf) && nsp[0] == '/' && nsp[1] == '/') {
+      char *p = nsp + 2;
+      while(p < buf + sizeof(buf) && (*p == ' ' || *p == '\t')) p++;
+      char *bep = strstr(p, "opt:");
+      if(bep != NULL) {
+	ensure_a_string_ends_with_space(compile_options, sizeof(compile_options));
+	strncat(compile_options, bep + 4, sizeof(compile_options));
+      }
+      char *aep = strstr(p, "opta:");
+      if(aep != NULL) {
+	ensure_a_string_ends_with_space(compile_options_last, sizeof(compile_options_last));
+	strncat(compile_options_last, aep + 5, sizeof(compile_options_last));
+      }
+      continue;
+    }
+    fprintf(ofp, "%s\n", l);
+  }
+  if(has_included_eval_header) {
+    ensure_a_string_ends_with_space(compile_options, sizeof(compile_options));
+    strncat(compile_options, "-rdynamic", sizeof(compile_options));
+    ensure_a_string_ends_with_space(compile_options_last, sizeof(compile_options_last));
+    strncat(compile_options_last, "-ldl", sizeof(compile_options_last));
+    fprintf(ofp, "\n// cpas generated code for eval\n");
+    fprintf(ofp, "const char* _cpas_compile_option = \"%s\";\n", compile_options);
+    fprintf(ofp, "const char* _cpas_compile_option_last = \"%s\";\n", compile_options_last);
+    fprintf(ofp, "const char* _cpas_shared_library_base_name = \"%s_so\";\n", executable_path);
+    fprintf(ofp, "const char* _cpas_include_directives = ""\n");
+    rewind(ifp);
+    while(!feof(ifp)) {
+      char *l = fgets(buf, sizeof(buf), ifp);
+      if(l == NULL) break;
+      if(buf[0] == '#' && buf[1] == '!') continue;
+      chomp(buf);
+      char *nsp = buf;
+      while(nsp < buf + sizeof(buf) && (*nsp == ' ' || *nsp == '\t')) nsp++;
+      if(*nsp == '#') {
+	fprintf(ofp, "\t\"%s\\n\"\n", buf);
+      }
+    }
+    fprintf(ofp, "\t;\n", buf);
   }
   fclose(ofp);
   fclose(ifp);
@@ -97,13 +183,15 @@ void compile_script()
   if((child = fork()) == 0) {
     char buf[2048];
     int mystatus;
-    sprintf(buf, "g++ %s -o %s %s\n", source_code_path, executable_path, compile_options);
+    snprintf(buf, sizeof(buf), "g++ %s %s -o %s %s\n", compile_options, source_code_path, executable_path, compile_options_last);
+    if(getenv("CPAS_DEBUG") != NULL)
+      fprintf(stderr, buf);
     mystatus = system(buf);
     if(mystatus == -1) abort();
-    exit(WEXITSTATUS(status));
+    exit(WEXITSTATUS(mystatus));
   }
   wait(&status);
-  if(!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+  if(!WIFEXITED(status) || (WIFEXITED(status) && WEXITSTATUS(status) != 0)) {
     exit(6);
   }
 }
