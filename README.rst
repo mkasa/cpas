@@ -125,4 +125,7 @@ License
 This software is distributed under modified BSD license
 (http://www.opensource.org/licenses/bsd-license.php)
 
+Several header files (string_piece.h and dependencies) are
+derived from the Chromium project, and their license is
+shown at the head of the header files. 
 
