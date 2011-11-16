@@ -119,6 +119,60 @@ Here is an exmaple.::
 	    ASSERT_WMD("x must be 1233", x == 1233, VARDUMP(x));
 	}
 
+Eval
+====
+
+cpas has a built-in eval function, similarly to other scripting
+languages like Perl or Ruby. First, you need to include eval.h,
+which is included in the distribution.::
+
+	#include <eval.h>
+
+Next, you create an instance of Eval class, then calling
+eval_function member function.::
+
+	Eval ev;
+	Eval::Handle hd = ev.eval_function(
+		"extern \"C\" bool is_record_match(const char* line_str) { "
+		"    const int val = atoi(line_str);"
+		"    return val < 80;"
+		"}");
+
+Eval::Handle is a handle to access to the eval'ed functions.
+You may write mutiple functions in the string. You may define
+global variables as well. Calling eval_function invokes g++,
+which compiles the string into a dynamic linking library.
+Note that demangling is not automatic, so if you intend to eval
+C++ functions without extern "C", you may need the mangled name
+of the symbols.
+
+You can get the pointer to the functions or variables by calling
+get_function.::
+
+	typedef bool (MATCH_CHECK_FUNC_TYPE)(const char *);
+	MATCH_CHECK_FUNC_TYPE* func;
+	hd.get_function("is_record_match", &func);
+	// Here you got the pointer in func.
+
+You should use typedef to avoid messy pointer declaration, but
+still you can get by without typedef if you want. get_function
+member is a template function so you do not need to cast by
+yourself. That is why I did not return the pointer by return value.
+
+If the returned pointer is NULL, it indicates an error.::
+
+	if(func == NULL) {
+		fprintf(stderr, "ERROR: could not find such a function\n");
+		exit(1);
+	}
+
+You can call the eval'ed function as normal functions.::
+
+	if(func("70")) {
+		printf("70 < 80\n");
+	}
+
+
 License
 =======
 
