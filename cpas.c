@@ -21,14 +21,16 @@ char executable_file_name[PATH_MAX];
 char my_cache_dir[PATH_MAX + 10];
 char source_code_path[PATH_MAX + 18];
 char executable_path[PATH_MAX + 18];
-char compile_options[1024];
-char compile_options_last[1024];
+char compiler_name[PATH_MAX + 18] = "g++";
+char compile_options[4096];
+char compile_options_last[4096];
 static int flag_skelton    = 0;
 static int flag_getopt     = 0;
 static int flag_perldoc    = 0;
 static int flag_stackdump  = 0;
 static int flag_debugmacro = 0;
 static int flag_emacs_var  = 0;
+static int flag_icpc       = 0; /* Use Intel C++ when outputting a skel*/
  
 void generate_cache_file_names()
 {
@@ -144,6 +146,10 @@ void convert_script(char *original_script)
 	ensure_a_string_ends_with_space(compile_options_last, sizeof(compile_options_last));
 	strncat(compile_options_last, aep + 5, sizeof(compile_options_last));
       }
+      char *cep = strstr(p, "compiler:");
+      if(cep != NULL) {
+        strncpy(compiler_name, cep + 9, sizeof(compiler_name));
+      }
       continue;
     }
     fprintf(ofp, "%s\n", l);
@@ -195,7 +201,7 @@ void compile_script(char *script_path)
       while(0 < p && canonical_path[p - 1] != '/') p--;
       if(0 < p) canonical_path[p] = '\0';
     }
-    snprintf(buf, sizeof(buf), "g++ %s %s -o %s -I%s %s\n", compile_options, source_code_path, executable_path, canonical_path, compile_options_last);
+    snprintf(buf, sizeof(buf), "%s %s %s -o %s -I%s %s\n", compiler_name, compile_options, source_code_path, executable_path, canonical_path, compile_options_last);
     if(getenv("CPAS_DEBUG") != NULL)
       fprintf(stderr, buf);
     mystatus = system(buf);
@@ -313,6 +319,9 @@ void output_skelton(char *original_script)
     fprintf(fp, " -I%s", prefix_dir);
   }
   fprintf(fp, "\n");
+  if(flag_icpc) {
+    fprintf(fp, "//compiler: icpc\n");
+  }
   fprintf(fp, "#include <iostream>\n");
   fprintf(fp, "#include <fstream>\n");
   fprintf(fp, "#include <string>\n");
@@ -407,12 +416,15 @@ int main(int argc, char *argv[])
       flag_stackdump = 1;
     } else if(strcmp(optstr, "dmacro") == 0) {
       flag_debugmacro = 1;
+    } else if(strcmp(optstr, "icpc") == 0) {
+      flag_icpc = 1;
     } else if(strcmp(optstr, "fskel") == 0) {
       flag_skelton = 1;
       flag_getopt = 1;
       flag_perldoc = 1;
       flag_emacs_var = 1;
       flag_stackdump = 1;
+      flag_icpc = 1;
       flag_debugmacro = 1;
     } else {
       fprintf(stderr, "unknown option %s\n", argv[optind]);
@@ -421,7 +433,7 @@ int main(int argc, char *argv[])
   }
   if(argc < optind + 1) {
     fprintf(stderr, "usage: cpas [options] <script>\n");
-    fprintf(stderr, "       cpas --skel [--getopt] [--doc] [--emacs] [--sdump] [--dmacro] <new script>\n");
+    fprintf(stderr, "       cpas --skel [--getopt] [--doc] [--emacs] [--sdump] [--dmacro] [--icpc] <new script>\n");
     fprintf(stderr, "       cpas --fskel <new script>\n");
     return 1;
   }

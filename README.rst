@@ -96,6 +96,10 @@ installed with cpas. Please add -dmacro when you create a skelton
 if you use the debug macro. For the debug macro, see the next
 section for details.
 
+If you are using Intel C++ compiler, you may want to use icpc
+instead of g++ to gain more speed. -icpc option adds a special
+comment that makes cpas use icpc.
+
 When your editor is emacs, -emacs might be also useful to enforce
 c++ mode. I prefer to use -fskel, which is equivalent to giving
 all the above options.
