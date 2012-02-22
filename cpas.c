@@ -316,7 +316,7 @@ void output_skelton(char *original_script)
   }
   fprintf(fp, "//opt: -g -O1");
   if(flag_stackdump) {
-    fprintf(fp, " -I%s", prefix_dir);
+    fprintf(fp, " -I%s/include", prefix_dir);
   }
   fprintf(fp, "\n");
   if(flag_icpc) {
