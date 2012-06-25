@@ -1,6 +1,6 @@
 # -*- python -*-
 APPNAME = 'cpas'
-VERSION = '1.06'
+VERSION = '1.07'
 
 def set_options(ctx):
     ctx.tool_options('compiler_cc')

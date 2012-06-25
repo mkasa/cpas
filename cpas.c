@@ -338,7 +338,7 @@ void output_skelton(char *original_script)
   fprintf(fp, "\nusing namespace std;\n\n");
   fprintf(fp, "int main(int argc, char *argv[]) {\n");
   if(flag_stackdump) {
-    fprintf(fp, "  GDB_On_SEGV gos(argv[0]);\n");
+    fprintf(fp, "\tGDB_On_SEGV gos(argv[0]);\n");
   }
   if(flag_getopt) {
     fprintf(fp, "\tint c;\n"
