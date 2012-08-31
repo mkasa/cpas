@@ -636,4 +636,12 @@ inline bool operator>=(const StringPiece& x, const StringPiece& y) {
 
 }  // namespace base
 
+#include <ostream>
+
+inline std::ostream& operator << (std::ostream& os, const base::StringPiece& s)
+{
+    for(size_t i = 0; i < s.size(); ++i) os << s[i];
+    return os;
+}
+
 #endif  // BASE_STRING_PIECE_H_
