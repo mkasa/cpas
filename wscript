@@ -1,6 +1,6 @@
 # -*- python -*-
 APPNAME = 'cpas'
-VERSION = '1.08'
+VERSION = '1.09'
 
 def set_options(ctx):
     ctx.tool_options('compiler_cc')
@@ -14,7 +14,7 @@ def build(bld):
     bld(features='cc cprogram',
         source='cpas.c',
         target='cpas')
-    bld.install_files('${PREFIX}/include', ['stackdump.h', 'debug.h', 'eval.h', 'tsv.h', 'string_piece.h'])
+    bld.install_files('${PREFIX}/include', ['stackdump.h', 'cpas_debug.h', 'cpas_eval.h', 'cpas_tsv.h', 'string_piece.h'])
     bld.install_files('${PREFIX}/bin', ['cppdoc'], chmod=0755)
 
 

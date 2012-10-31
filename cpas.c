@@ -129,8 +129,8 @@ void convert_script(char *original_script)
       if(p != NULL) {
 	// NOTE: Should use a better parser here...
 	//       This parser will not catch '#include< eval.h >', for example.
-	if(strstr(p, "\"eval.h\"") != NULL) has_included_eval_header = 1;
-	if(strstr(p, "<eval.h>") != NULL) has_included_eval_header = 1;
+	if(strstr(p, "\"cpas_eval.h\"") != NULL) has_included_eval_header = 1;
+	if(strstr(p, "<cpas_eval.h>") != NULL) has_included_eval_header = 1;
       }
     }
     if(nsp + 2 < buf + sizeof(buf) && nsp[0] == '/' && nsp[1] == '/') {
@@ -333,7 +333,7 @@ void output_skelton(char *original_script)
     fprintf(fp, "#include <stackdump.h>\n");
   }
   if(flag_debugmacro) {
-    fprintf(fp, "#include <debug.h>\n");
+    fprintf(fp, "#include <cpas_debug.h>\n");
   }
   fprintf(fp, "\nusing namespace std;\n\n");
   fprintf(fp, "int main(int argc, char *argv[]) {\n");

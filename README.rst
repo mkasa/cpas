@@ -110,7 +110,7 @@ Debug macro
 
 Here is an exmaple.::
 
-	#include <debug.h>
+	#include <cpas_debug.h>
 	
 	void your_function()
 	{
@@ -130,7 +130,7 @@ cpas has a built-in eval function, similarly to other scripting
 languages like Perl or Ruby. First, you need to include eval.h,
 which is included in the distribution.::
 
-	#include <eval.h>
+	#include <cpas_eval.h>
 
 Next, you create an instance of Eval class, then calling
 eval_function member function.::
