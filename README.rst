@@ -177,6 +177,25 @@ You can call the eval'ed function as normal functions.::
 	}
 
 
+cppdoc
+======
+Many scripting languages have a built-in document system such as
+perldoc for Perl. A man page embedded in a script is easy to
+manage. cppdoc is a tool to view a man page embedded in a cpas script.
+You can use cppdoc exactly the same as perldoc.
+
+String manipulation library
+===========================
+One of the purposes you use cpas might be faster processing of text files.
+cpas comes with a bunch of header files that facilitate text processing.
+
+string_piece.h is a header file derived from Google's string_piece.h,
+and provides a slice for string. It is very useful to avoid temporary
+creation of std::string instances.
+
+cpas_tsv.h is a header library that parses TAB separated value (TSV)
+file very fast. You can see the header to see what it provides.
+
 License
 =======
 
