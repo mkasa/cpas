@@ -4,5 +4,6 @@ build
 cpas
 Makefile
 .lock-wscript
+*.tar.bz2
 *~
 
